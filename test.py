@@ -11,13 +11,32 @@ except ImportError:
     sys.exit(1)
 
 def main():
-    parser = argparse.ArgumentParser(description='水果检测模型远程调用脚本')
+    parser = argparse.ArgumentParser(
+        description='水果检测模型远程调用脚本',
+        epilog='''
+使用示例:
+  本地调用: python test.py peach.jpg
+  指定主机: python test.py peach.jpg --host 192.168.1.100
+  指定端口: python test.py peach.jpg --host 192.168.1.100 --port 8080
+  使用环境变量: export FRUIT_DETECTION_URL=http://192.168.1.100:8000/api/v1/fruit/detect
+                python test.py peach.jpg
+        '''
+    )
     parser.add_argument('image_path', help='要检测的图片文件路径')
-    parser.add_argument('--url', default='http://120.46.71.74:8000/api/v1/fruit/detect',
-                       help='模型服务API地址 (默认: http://120.46.71.74:8000/api/v1/fruit/detect)')
+    
+    # 支持环境变量设置默认URL，便于外部调用
+    default_url = os.getenv('FRUIT_DETECTION_URL', 'http://localhost:8000/api/v1/fruit/detect')
+    parser.add_argument('--url', default=default_url,
+                       help=f'模型服务API地址 (默认: {default_url},可通过环境变量FRUIT_DETECTION_URL设置)')
     parser.add_argument('--timeout', type=int, default=30, help='请求超时时间(秒)')
+    parser.add_argument('--host', help='服务主机地址 (例如: 192.168.1.100)')
+    parser.add_argument('--port', type=int, default=8000, help='服务端口 (默认: 8000)')
     
     args = parser.parse_args()
+    
+    # 如果指定了host参数，则覆盖URL
+    if args.host:
+        args.url = f"http://{args.host}:{args.port}/api/v1/fruit/detect"
     
     # 检查图片文件是否存在
     if not os.path.exists(args.image_path):

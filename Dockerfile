@@ -13,7 +13,6 @@ RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.li
         libgl1 \
         libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
-    && apt-get clean
 
 
 # 3. 使用国内镜像源安装Python包

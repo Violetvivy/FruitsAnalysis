@@ -1,8 +1,9 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from app.models import FruitRecognitionModel
-from app.schemas import FruitRecognitionDTO
+from app.schemas import FruitRecognitionDTO, URLDetectionRequest
 import uvicorn
+import requests
 
 app = FastAPI(
     title="水果识别服务",
@@ -53,6 +54,25 @@ async def detect_fruits(file: UploadFile = File(...)):
         
         return JSONResponse(content=result)
     
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"处理失败: {str(e)}")
+
+@app.post("/api/v1/fruit/detect/url", response_model=FruitRecognitionDTO)
+async def detect_fruits_from_url(request: URLDetectionRequest):
+    """
+    通过图片URL检测水果，返回水果类型识别和目标检测结果
+    """
+    if not request.image_url:
+        raise HTTPException(status_code=400, detail="请提供有效的图片URL")
+    
+    try:
+        # 使用模型处理URL图片
+        result = model.process_image_from_url(request.image_url)
+        
+        return JSONResponse(content=result)
+    
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(status_code=400, detail=f"无法从URL获取图片: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"处理失败: {str(e)}")
 

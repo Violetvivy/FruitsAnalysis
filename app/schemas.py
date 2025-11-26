@@ -16,3 +16,6 @@ class FruitRecognitionDTO(BaseModel):
     fruits: List[FruitInfo]
     totalFruits: int
     timestamp: str
+
+class URLDetectionRequest(BaseModel):
+    image_url: str
